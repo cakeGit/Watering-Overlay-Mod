@@ -17,10 +17,10 @@ public class WateringOverlay {
     }
     
     public static class DisplayOptions {
-        static boolean ACTIVE = false;
-        static int RANGE = 10;
-        static int VERTICAL_RANGE = 5;
-        static OverlaySelector SELECTOR = OverlaySelector.CROP_ICON;
+        public static boolean ACTIVE = false;
+        public static int RANGE = 10;
+        public static int VERTICAL_RANGE = 5;
+        public static OverlaySelector SELECTOR = OverlaySelector.CROP_ICON;
     }
     
     public enum OverlaySelector {
