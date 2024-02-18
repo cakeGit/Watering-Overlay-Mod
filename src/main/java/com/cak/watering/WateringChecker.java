@@ -1,21 +1,23 @@
-package com.cak.watering.handling;
+package com.cak.watering;
 
 import com.cak.watering.WateringOverlay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.HashSet;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class WateringChecker {
     
     /**Used for tracking farmland hydration*/
@@ -23,30 +25,39 @@ public class WateringChecker {
     /**Used for tracking sugar cane hydration*/
     static HashSet<BlockPos> IMMEDIATE_HYDRATION_BLOCKS;
     
-    static boolean hasBounds = false;
-    static BoundingBox WATER_BOUNDS = new BoundingBox(0, 0, 0, 0, 0, 0);
+    public static Level lastLevel = null;
     
-    static int LAZY_TICK_INTERVAL = 20;
+    static int LAZY_TICK_INTERVAL = 100;
     static int lazyTick = 0;
     
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            return;
+        }
+        
+        Minecraft mc = Minecraft.getInstance();
+        Level level = mc.level;
+        Player player = mc.player;
+        if (level == null || player == null)
+            return;
+        
         lazyTick++;
-        if (lazyTick == LAZY_TICK_INTERVAL) {
+        if (lazyTick == LAZY_TICK_INTERVAL || lastLevel != level) {
             lazyTick = 0;
     
-            Minecraft mc = Minecraft.getInstance();
-            Level level = mc.level;
+            lastLevel = level;
+            FARMLAND_RANGE_BLOCKS = new HashSet<>();
+            IMMEDIATE_HYDRATION_BLOCKS = new HashSet<>();
             
-            if (mc.level != null && mc.player != null)
-                updateWatering(mc.level, mc.player);
+            updateWatering(level, player);
         }
     }
     
     static final Direction[] HORIZONTAL_DIRECTIONS = new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST};
     static final int WATER_RANGE = 4;
     
-    public static void updateWatering(Level level, LocalPlayer player) {
+    public static void updateWatering(Level level, Player player) {
         BlockPos originPos = BlockPos.containing(player.position());
         
         int updateRange = WateringOverlay.DisplayOptions.RANGE + WATER_RANGE;
@@ -82,10 +93,6 @@ public class WateringChecker {
                 FARMLAND_RANGE_BLOCKS.add(blockPos);
             }
         }
-    }
-    
-    public static boolean isInside(BlockPos blockPos) {
-        return hasBounds && WATER_BOUNDS.isInside(blockPos);
     }
     
 }
