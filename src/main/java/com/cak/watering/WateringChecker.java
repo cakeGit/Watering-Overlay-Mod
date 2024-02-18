@@ -1,15 +1,12 @@
 package com.cak.watering;
 
-import com.cak.watering.WateringOverlay;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -50,6 +47,8 @@ public class WateringChecker {
             FARMLAND_RANGE_BLOCKS = new HashSet<>();
             IMMEDIATE_HYDRATION_BLOCKS = new HashSet<>();
             
+            
+            System.out.println("update");
             updateWatering(level, player);
         }
     }
@@ -70,10 +69,10 @@ public class WateringChecker {
             updateRange, updateVerticalRange, updateRange
         );
         
-        for (int xOffset = minPos.getX(); xOffset <= maxPos.getX(); xOffset++) {
-            for (int yOffset = minPos.getY(); yOffset <= maxPos.getY(); yOffset++) {
-                for (int zOffset = minPos.getZ(); zOffset <= maxPos.getZ(); zOffset++) {
-                    BlockPos blockPos = minPos.offset(xOffset, yOffset, zOffset);
+        for (int x = minPos.getX(); x <= maxPos.getX(); x++) {
+            for (int y = minPos.getY(); y <= maxPos.getY(); y++) {
+                for (int z = minPos.getZ(); z <= maxPos.getZ(); z++) {
+                    BlockPos blockPos = new BlockPos(x, y, z);
                     BlockState state = level.getBlockState(blockPos);
                     if (state.getBlock() == Blocks.WATER) {
                         putWaterBlock(blockPos);
@@ -90,7 +89,7 @@ public class WateringChecker {
     
         for (int xOffset = -WATER_RANGE; xOffset <= WATER_RANGE; xOffset++) {
             for (int zOffset = -WATER_RANGE; zOffset <= WATER_RANGE; zOffset++) {
-                FARMLAND_RANGE_BLOCKS.add(blockPos);
+                FARMLAND_RANGE_BLOCKS.add(blockPos.offset(xOffset, 0, zOffset));
             }
         }
     }
