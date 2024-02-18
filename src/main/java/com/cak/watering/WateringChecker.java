@@ -24,7 +24,7 @@ public class WateringChecker {
     
     public static Level lastLevel = null;
     
-    static int LAZY_TICK_INTERVAL = 100;
+    static int LAZY_TICK_INTERVAL = 5;
     static int lazyTick = 0;
     
     @SubscribeEvent
@@ -38,7 +38,7 @@ public class WateringChecker {
         Player player = mc.player;
         if (level == null || player == null)
             return;
-        
+    
         lazyTick++;
         if (lazyTick == LAZY_TICK_INTERVAL || lastLevel != level) {
             lazyTick = 0;
