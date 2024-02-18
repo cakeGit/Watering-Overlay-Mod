@@ -32,8 +32,8 @@ public class WateringOverlay {
     
     public enum OverlaySelector {
         
-        SOILS_BOX(state -> state.is(WateringTags.TILLABLE_SOILS), state -> state.is(WateringTags.SUGAR_CANE_PLACEABLE), OverlayRenderType.ICON),
-        FARMLAND_BOX(state -> state.is(WateringTags.FARMLAND), state -> state.is(WateringTags.SUGAR_CANE_PLACEABLE), OverlayRenderType.ICON),
+        SOILS_BOX(state -> state.is(WateringTags.TILLABLE_SOILS), state -> state.is(WateringTags.SUGAR_CANE_PLACEABLE), OverlayRenderType.BOX),
+        FARMLAND_BOX(state -> state.is(WateringTags.FARMLAND), state -> state.is(WateringTags.SUGAR_CANE_PLACEABLE), OverlayRenderType.BOX),
         CROP_ICON(state -> state.is(WateringTags.FARMLAND), state -> false, OverlayRenderType.ICON),
         OFF(null, null, null)
         ;
