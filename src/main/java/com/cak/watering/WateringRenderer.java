@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -18,7 +19,6 @@ import org.joml.Matrix4f;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class WateringRenderer {
-    
     
     //Corners can clip without issue, lucky me!
     static final float PATTERN_WIDTH = 16 / 256f;
@@ -37,20 +37,19 @@ public class WateringRenderer {
             return;
         
         //WateringChecker.FARMLAND_RANGE_BLOCKS will safely include WateringChecker.IMMEDIATE_RANGE_BLOCKS
-
-//        for (BlockPos blockPos : WateringChecker.FARMLAND_RANGE_BLOCKS) {
-//            BlockState state = level.getBlockState(blockPos);
-//
-//            //Check to use blue or green texture
-//            boolean isFarmlandRendering = WateringOverlay.DisplayOptions.SELECTOR.shouldRenderInFarmlandRange(state);
-//
-//            boolean isRendering = isFarmlandRendering ||
-//                (WateringChecker.IMMEDIATE_HYDRATION_BLOCKS.contains(blockPos)
-//                    && WateringOverlay.DisplayOptions.SELECTOR.shouldRenderInImmediateRange(state));
-//
-//            if (isRendering)
-//                renderBox(event, blockPos, isFarmlandRendering);
-//        }
+    
+        for (BlockPos blockPos : WateringChecker.FARMLAND_RANGE_BLOCKS) {
+            BlockState state = level.getBlockState(blockPos);
+            //Check to use blue or green texture
+            boolean isFarmlandRendering = WateringOverlay.DisplayOptions.SELECTOR.shouldRenderInFarmlandRange(state);
+            
+            boolean isRendering = isFarmlandRendering ||
+                (WateringChecker.IMMEDIATE_HYDRATION_BLOCKS.contains(blockPos)
+                    && WateringOverlay.DisplayOptions.SELECTOR.shouldRenderInImmediateRange(state));
+            
+            if (isRendering)
+                renderBox(event, blockPos, isFarmlandRendering);
+        }
     }
     
     private static void renderBox(RenderLevelStageEvent event, BlockPos blockPos, boolean isFarmlandRendering) {
@@ -62,7 +61,7 @@ public class WateringRenderer {
         for (Direction direction : Direction.values()) {
             poseStack.pushPose();
             
-            RenderSystem.setShaderColor(1, 1, 1, 1);
+            RenderSystem.setShaderColor(1, 1, 1, 0.5f);
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderTexture(0, WateringOverlay.asResource("textures/water_overlay.png"));
             RenderSystem.enableBlend();
@@ -84,6 +83,7 @@ public class WateringRenderer {
             
             tesselator.end();
             poseStack.popPose();
+            RenderSystem.setShaderColor(1, 1, 1, 1f);
         }
         
     }
