@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.HashSet;
@@ -27,11 +26,10 @@ public class WateringChecker {
     static int LAZY_TICK_INTERVAL = 5;
     static int lazyTick = 0;
     
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
+    public static void tickFarmlandDiscovery(TickEvent.ClientTickEvent event) {
+        if (WateringOverlay.DisplayOptions.SELECTOR == OverlaySelector.OFF
+            || event.phase == TickEvent.Phase.END)
             return;
-        }
         
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
@@ -42,13 +40,11 @@ public class WateringChecker {
         lazyTick++;
         if (lazyTick == LAZY_TICK_INTERVAL || lastLevel != level) {
             lazyTick = 0;
-    
+        
             lastLevel = level;
             FARMLAND_RANGE_BLOCKS = new HashSet<>();
             IMMEDIATE_HYDRATION_BLOCKS = new HashSet<>();
-            
-            
-            System.out.println("update");
+        
             updateWatering(level, player);
         }
     }
