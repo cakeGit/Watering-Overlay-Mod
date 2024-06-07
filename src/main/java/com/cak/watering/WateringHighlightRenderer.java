@@ -5,65 +5,54 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.EnumMap;
 
 public class WateringHighlightRenderer {
     
     public static void renderWateringHighlightBox(RenderLevelStageEvent event, BlockPos blockPos, ResourceLocation texture, EnumMap<Direction, Boolean> connectedSides) {
-        PoseStack poseStack = event.getPoseStack();
-        
-        RenderSystem.setShaderColor(1, 1, 1, 0.5f);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, texture);
-        RenderSystem.enableBlend();
-        RenderSystem.enableDepthTest();
-    
-        poseStack.pushPose();
+        PoseStack poseStack = new PoseStack();
+        poseStack.mulPose(event.getPoseStack());
         
         AABB renderedCubeAABB = new AABB(
-            new BlockPos(0, 0, 0),
-            new BlockPos(1, 1, 1)
+            new Vec3(0, 0, 0),
+            new Vec3(1, 1, 1)
         );
         
         for (Direction direction : Direction.values()) {
             if (!connectedSides.get(direction))
                 renderedCubeAABB = includeAABBs(renderedCubeAABB, cubeOnSide(direction.getOpposite().getNormal(), 1/16f, 1f));
         }
-        
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder buffer = tesselator.getBuilder();
-    
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+
+        VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.beaconBeam(texture, true));
         
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         
-        poseStack.mulPoseMatrix(new Matrix4f().rotate(camera.rotation()));
-        translatePSVector(poseStack, camera.getPosition().multiply(1, -1, 1));
-        translatePSVector(poseStack, Vec3.atLowerCornerOf(blockPos.offset(1, 0, 1)).multiply(-1, 1, -1));
-        
+        translatePSVector(poseStack, camera.getPosition().multiply(-1, -1, -1));
+        translatePSVector(poseStack, Vec3.atLowerCornerOf(blockPos.offset(0, 0, 0)).multiply(1, 1, 1));
         renderHighlightCube(poseStack, buffer, renderedCubeAABB, connectedSides);
-    
-        tesselator.end();
-        poseStack.popPose();
-        
-        RenderSystem.setShaderColor(1, 1, 1, 1f);
         
     }
     
     private static void translatePSVector(PoseStack poseStack, Vec3 vec) {
-        poseStack.translate(vec.x(), vec.y(), vec.z());
+        poseStack.translate((float) vec.x(), (float) vec.y(), (float) vec.z());
     }
     
-    private static void renderHighlightCube(PoseStack poseStack, BufferBuilder buffer, AABB renderedCubeAABB, EnumMap<Direction, Boolean> connectedSides) {
+    private static void renderHighlightCube(PoseStack poseStack, VertexConsumer buffer, AABB renderedCubeAABB, EnumMap<Direction, Boolean> connectedSides) {
         if (!connectedSides.get(Direction.NORTH))
             renderHighlightCubeSide(poseStack, buffer, Direction.NORTH, renderedCubeAABB,
                 new Vec3(0, 0, 1),
@@ -97,9 +86,9 @@ public class WateringHighlightRenderer {
     }
     
     
-    private static void renderHighlightCubeSide(PoseStack poseStack, BufferBuilder buffer, Direction direction, AABB renderedCubeAABB, Vec3 from, Vec3 to) {
-        Vec3 min = minVector(renderedCubeAABB);
-        Vec3 max = maxVector(renderedCubeAABB);
+    private static void renderHighlightCubeSide(PoseStack poseStack, VertexConsumer buffer, Direction direction, AABB renderedCubeAABB, Vec3 from, Vec3 to) {
+        Vec3 min = minVector(renderedCubeAABB).multiply(1, -1, 1).add(0, 1, 0);
+        Vec3 max = maxVector(renderedCubeAABB).multiply(1, -1, 1).add(0, 1, 0);
         
         Vec3 diff = max.subtract(min);
         
@@ -116,9 +105,6 @@ public class WateringHighlightRenderer {
         Vec3 secondaryAxis = getSecondaryAxis(perpendiculars);
         Vec3 secondaryTo = from.add(diff.multiply(secondaryAxis));
         
-        float PATTERN_BORDER = 4/256f;
-        float PATTERN_WIDTH = 4/256f;
-        
         Vec3 realDiff = to.subtract(from);
         Vec3 realDiffPrimary = realDiff.multiply(getFirstAxis(realDiff));
         Vec3 realDiffSecondary = realDiff.multiply(getSecondaryAxis(realDiff));
@@ -126,34 +112,61 @@ public class WateringHighlightRenderer {
         float primaryUV = (float) ((sumVector(realDiffPrimary) / (1/16f)) * (4/256f));
         float secondaryUV = (float) ((sumVector(realDiffSecondary) / (1/16f)) * (4/256f));
         
+        Vector3f n = new Vector3f((float) normal.x, (float) normal.y, (float) normal.z);
+        
         Matrix4f m = poseStack.last().pose();
+        
+        int alpha = 90;
+        
+        if (normalOrdinal == -1)
+            buffer.vertex(m, (float) to.x, (float) to.y, (float) to.z)
+                .color(255, 255, 255, alpha)
+                .uv(primaryUV, secondaryUV)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
+                .uv2(0, 0)
+                .normal(n.x, n.y, n.z)
+                .endVertex();
+        else
+            buffer.vertex(m, (float) from.x, (float) from.y, (float) from.z)
+                .color(255, 255, 255, alpha)
+                .uv(0, 0)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
+                .uv2(0, 0)
+                .normal(n.x, n.y, n.z)
+                .endVertex();
+        
+        buffer.vertex(m, (float) firstTo.x, (float) firstTo.y, (float) firstTo.z)
+            .color(255, 255, 255, alpha)
+            .uv(0, secondaryUV)
+            .overlayCoords(OverlayTexture.NO_OVERLAY)
+            .uv2(0, 0)
+            .normal(n.x, n.y, n.z)
+            .endVertex();
         
         if (normalOrdinal == 1)
             buffer.vertex(m, (float) to.x, (float) to.y, (float) to.z)
+                .color(255, 255, 255, alpha)
+                .uv(primaryUV, secondaryUV)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(0, 0)
-                .uv(primaryUV, secondaryUV).endVertex();
+                .normal(n.x, n.y, n.z)
+                .endVertex();
         else
             buffer.vertex(m, (float) from.x, (float) from.y, (float) from.z)
+                .color(255, 255, 255, alpha)
+                .uv(0, 0)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(0, 0)
-                .uv(0, 0).endVertex();
-        
-        buffer.vertex(m, (float) firstTo.x, (float) firstTo.y, (float) firstTo.z)
-            .uv2(0, 0)
-            .uv(0, secondaryUV).endVertex();
-        
-        if (!(normalOrdinal == 1))
-            buffer.vertex(m, (float) to.x, (float) to.y, (float) to.z)
-                .uv2(0, 0)
-                .uv(primaryUV, secondaryUV).endVertex();
-        else
-            buffer.vertex(m, (float) from.x, (float) from.y, (float) from.z)
-                .uv2(0, 0)
-                .uv(0, 0).endVertex();
+                .normal(n.x, n.y, n.z)
+                .endVertex();
         
         buffer.vertex(m, (float) secondaryTo.x, (float) secondaryTo.y, (float) secondaryTo.z)
+            .color(255, 255, 255, alpha)
+            .uv(primaryUV, 0)
+            .overlayCoords(OverlayTexture.NO_OVERLAY)
             .uv2(0, 0)
-            .uv(primaryUV, 0).endVertex();
-    
+            .normal(n.x, n.y, n.z)
+            .endVertex();
     }
     
     private static Vec3 getFirstAxis(Vec3 perpendiculars) {
@@ -165,8 +178,7 @@ public class WateringHighlightRenderer {
     }
     
     private static AABB cubeOnSide(Vec3i normalVec3i, float height, float width) {
-        Vec3 normal = Vec3.atLowerCornerOf(normalVec3i);
-        normal = new Vec3(normal.x, -normal.y, normal.z);
+        Vec3 normal = Vec3.atLowerCornerOf(normalVec3i).multiply(1, -1, 1);
         
         double normalOrdinal = sumVector(normal); //Expect axis aligned so no need for anything else
         

@@ -6,7 +6,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -49,13 +52,13 @@ public class WateringChecker {
         }
     }
     
-    static final Direction[] HORIZONTAL_DIRECTIONS = new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST};
+    static final Direction[] HORIZONTAL_DIRECTIONS = new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
     static final int WATER_RANGE = 4;
     
     public static void updateWatering(Level level, Player player) {
         BlockPos originPos = BlockPos.containing(player.position());
         
-        int updateRange = WateringOverlay.DisplayOptions.RANGE + WATER_RANGE;
+        int updateRange = WateringOverlay.DisplayOptions.RANGE + WATER_RANGE + 10;
         int updateVerticalRange = WateringOverlay.DisplayOptions.VERTICAL_RANGE + WATER_RANGE;
         
         BlockPos minPos = originPos.offset(
@@ -70,7 +73,9 @@ public class WateringChecker {
                 for (int z = minPos.getZ(); z <= maxPos.getZ(); z++) {
                     BlockPos blockPos = new BlockPos(x, y, z);
                     BlockState state = level.getBlockState(blockPos);
-                    if (state.getBlock() == Blocks.WATER) {
+                    if (state.getBlock() == Blocks.WATER ||
+                        state.getFluidState().is(Fluids.WATER) ||
+                        state.getFluidState().is(Fluids.FLOWING_WATER)) {
                         putWaterBlock(blockPos);
                     }
                 }
