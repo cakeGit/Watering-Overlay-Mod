@@ -4,11 +4,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -16,13 +16,13 @@ import java.util.Map;
 
 import static com.cak.watering.WateringHighlightRenderer.renderWateringHighlightBox;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@EventBusSubscriber(Dist.CLIENT)
 public class WateringHandlerEvents {
     
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        WateringChecker.tickFarmlandDiscovery(event);
-        WateringControls.tickControls(event);
+    public static void onClientTick(ClientTickEvent.Post event) {
+        WateringChecker.tickFarmlandDiscovery();
+        WateringControls.tickControls();
     }
     
     @SubscribeEvent
@@ -30,12 +30,6 @@ public class WateringHandlerEvents {
         if (WateringOverlay.DisplayOptions.SELECTOR == OverlaySelector.OFF
             || event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER)
             return;
-    
-//        EnumMap<Direction, Boolean> testValues = new EnumMap<>(Direction.class);
-//        for (Direction direction : Direction.values())
-//            testValues.put(direction, false);
-//        testValues.put(Direction.SOUTH, true);
-//        renderWateringHighlightBox(event, new BlockPos(2, 0, 4), WateredType.FARMLAND.texture, testValues);
         
         Level level = event.getCamera().getEntity().level();
         if (level != WateringChecker.lastLevel)

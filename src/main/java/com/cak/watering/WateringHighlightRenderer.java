@@ -1,22 +1,17 @@
 package com.cak.watering;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -26,7 +21,6 @@ public class WateringHighlightRenderer {
     
     public static void renderWateringHighlightBox(RenderLevelStageEvent event, BlockPos blockPos, ResourceLocation texture, EnumMap<Direction, Boolean> connectedSides) {
         PoseStack poseStack = new PoseStack();
-        poseStack.mulPose(event.getPoseStack());
         
         AABB renderedCubeAABB = new AABB(
             new Vec3(0, 0, 0),
