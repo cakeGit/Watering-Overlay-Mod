@@ -7,8 +7,14 @@ import java.util.function.Function;
 
 public enum OverlaySelector {
     
-    SOILS_BOX(state -> (state.is(WateringTags.TILLABLE_SOILS) || state.is(WateringTags.FARMLAND)), state -> state.is(WateringTags.SUGAR_CANE_PLACEABLE), WateringOverlay.OverlayRenderType.BOX, ChatFormatting.AQUA),
-    FARMLAND_BOX(state -> state.is(WateringTags.FARMLAND), state -> state.is(WateringTags.SUGAR_CANE_PLACEABLE), WateringOverlay.OverlayRenderType.BOX, ChatFormatting.LIGHT_PURPLE),
+    SOILS_BOX(
+        state -> (FarmingBlockTypes.FARMLAND_CANDIDATE.test(state) || FarmingBlockTypes.FARMLAND.test(state)),
+        FarmingBlockTypes.SUGAR_CANE_PLACEABLE::test,
+        WateringOverlay.OverlayRenderType.BOX, ChatFormatting.AQUA),
+    FARMLAND_BOX(
+        FarmingBlockTypes.FARMLAND::test,
+        FarmingBlockTypes.SUGAR_CANE_PLACEABLE::test,
+        WateringOverlay.OverlayRenderType.BOX, ChatFormatting.LIGHT_PURPLE),
     //CROP_ICON(state -> state.is(WateringTags.FARMLAND), state -> false, OverlayRenderType.ICON),
     OFF(null, null, null, ChatFormatting.RED);
     

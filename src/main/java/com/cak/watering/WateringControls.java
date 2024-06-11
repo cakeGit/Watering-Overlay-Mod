@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.ChatDecorator;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -38,7 +37,7 @@ public class WateringControls {
             
                 Minecraft.getInstance().player
                     .displayClientMessage(
-                        Component.literal("Changed selector to ").withStyle(ChatFormatting.GRAY)
+                        Component.translatable("chat.watering_overlay.option_title").withStyle(ChatFormatting.GRAY)
                             .append(Component.literal("[").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD))
                             .append(Component.literal(newSelector.name()).withStyle(newSelector.getChatFormatting(), ChatFormatting.BOLD))
                             .append(Component.literal("]").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)),
