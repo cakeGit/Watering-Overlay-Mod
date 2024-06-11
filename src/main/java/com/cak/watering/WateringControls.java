@@ -32,7 +32,7 @@ public class WateringControls {
             OverlaySelector newSelector = OverlaySelector.values()[WateringOverlay.DisplayOptions.SELECTOR_INDEX];
             WateringOverlay.DisplayOptions.SELECTOR = newSelector;
             
-            Minecraft.getInstance().player.displayClientMessage(Component.literal("Changed selector to ").withStyle(ChatFormatting.GRAY).append(Component.literal("[").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)).append(Component.literal(newSelector.name()).withStyle(newSelector.getChatFormatting(), ChatFormatting.BOLD)).append(Component.literal("]").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)), true);
+            Minecraft.getInstance().player.displayClientMessage(Component.translatable("chat.watering_overlay.option_title").withStyle(ChatFormatting.GRAY).append(Component.literal("[").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)).append(Component.literal(newSelector.name()).withStyle(newSelector.getChatFormatting(), ChatFormatting.BOLD)).append(Component.literal("]").withStyle(ChatFormatting.WHITE, ChatFormatting.BOLD)), true);
         }
     }
     

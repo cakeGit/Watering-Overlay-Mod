@@ -12,7 +12,7 @@ public class WateringOverlay {
     private static final Logger LOGGER = LogUtils.getLogger();
     
     public WateringOverlay() {
-        WateringTags.register();
+        FarmingBlockTypes.register();
     }
     
     public static ResourceLocation asResource(String location) {
