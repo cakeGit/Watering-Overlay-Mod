@@ -15,7 +15,7 @@ public class WateringOverlay {
     
     public WateringOverlay() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, OverlayConfig.SPEC);
-        WateringTags.register();
+        FarmingBlockTypes.register();
     }
     
     public static ResourceLocation asResource(String location) {
