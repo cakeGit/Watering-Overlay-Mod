@@ -2,7 +2,7 @@ package com.cak.watering;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file

@@ -4,11 +4,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -16,11 +16,13 @@ import java.util.Map;
 
 import static com.cak.watering.WateringHighlightRenderer.renderWateringHighlightBox;
 
-@EventBusSubscriber(Dist.CLIENT)
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class WateringHandlerEvents {
     
     @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event) {
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        
         WateringChecker.tickFarmlandDiscovery();
         WateringControls.tickControls();
     }
@@ -28,7 +30,7 @@ public class WateringHandlerEvents {
     @SubscribeEvent
     public static void renderLevelLastEvent(RenderLevelStageEvent event) {
         if (WateringOverlay.DisplayOptions.SELECTOR == OverlaySelector.OFF
-            || event.getStage() != RenderLevelStageEvent.Stage.AFTER_WEATHER)
+            || event.getStage() != RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)
             return;
         
         Level level = event.getCamera().getEntity().level();

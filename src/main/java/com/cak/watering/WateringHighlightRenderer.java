@@ -1,6 +1,7 @@
 package com.cak.watering;
 
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -11,7 +12,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -20,7 +21,7 @@ import java.util.EnumMap;
 public class WateringHighlightRenderer {
     
     public static void renderWateringHighlightBox(RenderLevelStageEvent event, BlockPos blockPos, ResourceLocation texture, EnumMap<Direction, Boolean> connectedSides) {
-        PoseStack poseStack = new PoseStack();
+        PoseStack poseStack = event.getPoseStack();
         
         AABB renderedCubeAABB = new AABB(
             new Vec3(0, 0, 0),
@@ -36,9 +37,17 @@ public class WateringHighlightRenderer {
         
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         
-        translatePSVector(poseStack, camera.getPosition().multiply(-1, -1, -1));
+        poseStack.pushPose();
+//
+//        Quaternionf rotation = camera.rotation();
+//        rotation.invert();
+//        poseStack.mulPose(rotation);
+////        poseStack.mulPose(new Quaternionf(camera.rotation()));
+        translatePSVector(poseStack, camera.getPosition().scale(-1));
+        
         translatePSVector(poseStack, Vec3.atLowerCornerOf(blockPos.offset(0, 0, 0)).multiply(1, 1, 1));
         renderHighlightCube(poseStack, buffer, renderedCubeAABB, connectedSides);
+        poseStack.popPose();
         
     }
     
@@ -78,7 +87,6 @@ public class WateringHighlightRenderer {
                 new Vec3(1, 0, 1)
             );
     }
-    
     
     private static void renderHighlightCubeSide(PoseStack poseStack, VertexConsumer buffer, Direction direction, AABB renderedCubeAABB, Vec3 from, Vec3 to) {
         Vec3 min = minVector(renderedCubeAABB).multiply(1, -1, 1).add(0, 1, 0);
